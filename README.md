@@ -54,3 +54,18 @@ Entonces:
 $$
 I=\frac{3.3}{68000}
 $$
+Resultado numérico
+
+$$
+I_{max}=0.0000485\ A
+$$
+
+Conversión a miliamperios:
+
+$$
+I_{max}=0.0000485 \times 1000
+$$
+
+$$
+I_{max}=0.0485\ mA
+$$
