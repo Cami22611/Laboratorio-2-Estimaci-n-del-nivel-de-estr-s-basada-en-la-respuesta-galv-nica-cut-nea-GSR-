@@ -1,26 +1,19 @@
 # LABORATORIO 2: Estimación del nivel de estrés basaada en la respuesta galvánica cutánea GSR
 # INTRODUCCIÓN
-La actividad electrodérmica (EDA) hace referencia a los cambios eléctricos que ocurren en la piel debido a la actividad del sistema nervioso autónomo. Dentro de esta actividad se encuentra la respuesta galvánica cutánea (GSR), que corresponde a variaciones en la conductancia de la piel provocadas principalmente por la activación de las glándulas sudoríparas controladas por el sistema nervioso simpático.
-Cuando una persona experimenta estímulos emocionales, cognitivos o físicos, la actividad simpática aumenta y se produce una mayor secreción de sudor en la piel. Esto provoca una reducción en la resistencia eléctrica cutánea y por lo tanto un incremento en la conductancia de la piel.
+El estrés es una respuesta fisiológica del organismo ante estímulos que requieren atención, esfuerzo mental o adaptación. Durante estos procesos se activa el sistema nervioso autónomo, especialmente el sistema nervioso simpático, lo que genera diferentes cambios fisiológicos en el cuerpo humano. Uno de estos cambios es la variación en la actividad de las glándulas sudoríparas, la cual puede medirse a través de la conductancia eléctrica de la piel.
 
-La señal de GSR suele dividirse en dos componentes principales:
+La respuesta galvánica cutánea (GSR) es una técnica utilizada para registrar estas variaciones en la conductancia de la piel, permitiendo observar cambios asociados a estímulos emocionales, cognitivos o fisiológicos. Debido a su sensibilidad frente a la activación autonómica, la GSR se ha convertido en una herramienta ampliamente utilizada en estudios de psicofisiología y en el desarrollo de dispositivos biomédicos para el monitoreo del estrés. 
 
-- Skin Conductance Level (SCL): Representa el nivel basal de conductancia cutánea, que cambia lentamente a lo largo del tiempo.
-
-- Skin Conductance Response (SCR): Son respuestas rápidas y transitorias que aparecen ante estímulos específicos como estrés, dolor o actividad cognitiva.
-
-Estas respuestas se caracterizan por un incremento rápido en la conductancia seguido de una recuperación más lenta, comportamiento típico mostrado en estudios experimentales de actividad electrodérmica.
-# REQUERIMIENTOS
+En esta práctica se propone diseñar e implementar un dispositivo vestible capaz de medir la respuesta galvánica cutánea y visualizar la señal en tiempo real. A través de este sistema se busca analizar cómo varía la conductancia de la piel cuando una persona realiza diferentes actividades o experimenta cambios en su estado fisiológico.
 # FUNDAMENTOS TEÓRICOS
-La respuesta galvánica cutánea ha sido ampliamente estudiada como indicador fisiológico del estado emocional y cognitivo de una persona.
+La actividad electrodérmica (EDA) se refiere a los cambios en las propiedades eléctricas de la piel que ocurren como consecuencia de la actividad del sistema nervioso autónomo. Uno de los fenómenos más estudiados dentro de esta actividad es la respuesta galvánica cutánea (GSR), la cual corresponde a variaciones en la conductancia eléctrica de la piel asociadas principalmente a la activación del sistema nervioso simpático. Este sistema regula funciones involuntarias del organismo, incluyendo la actividad de las glándulas sudoríparas, cuya secreción influye directamente en la conductividad eléctrica de la piel. 
 
-Boucsein describe la actividad electrodérmica como uno de los indicadores más sensibles de activación del sistema nervioso simpático, debido a que las glándulas sudoríparas son controladas directamente por el sistema nervioso autónomo. Cuando se produce activación emocional o cognitiva, aumenta la secreción de sudor y, por lo tanto, la conductancia eléctrica de la piel.
+Cuando una persona experimenta estímulos emocionales, cognitivos o fisiológicos —como estrés, dolor o una respiración profunda— se produce una activación del sistema nervioso simpático que incrementa la actividad de las glándulas sudoríparas ecrinas. Este aumento de sudoración modifica la resistencia eléctrica de la piel y genera un incremento en su conductancia. Debido a esta relación fisiológica, la GSR se utiliza ampliamente como un indicador indirecto del nivel de activación emocional o cognitiva de una persona.
 
-Estudios experimentales han demostrado que la GSR aumenta significativamente frente a estímulos dolorosos, térmicos o cognitivos, correlacionándose con la intensidad percibida del estímulo. Investigaciones como las realizadas por Loggia et al. evidencian que la conductancia cutánea puede emplearse para evaluar la respuesta autonómica frente al dolor y al estrés.
+La señal de conductancia cutánea suele analizarse a partir de dos componentes principales. El nivel de conductancia cutánea (Skin Conductance Level, SCL) representa el nivel basal de conductancia de la piel, el cual varía lentamente en el tiempo y refleja el estado general de activación fisiológica del individuo. Por otro lado, la respuesta de conductancia cutánea (Skin Conductance Response, SCR) corresponde a cambios rápidos y transitorios que se producen frente a estímulos específicos. Estas respuestas se caracterizan por un aumento rápido en la conductancia seguido de una recuperación más lenta hacia el nivel basal, comportamiento que ha sido ampliamente reportado en estudios de psicofisiología. 
 
-Asimismo, investigaciones en psicofisiología han utilizado la GSR para estudiar procesos de toma de decisiones, emociones y procesos cognitivos complejos, debido a su capacidad de reflejar cambios rápidos en la activación del sistema nervioso simpático.
+Debido a su sensibilidad frente a cambios en la actividad autonómica, la GSR se ha utilizado en múltiples aplicaciones dentro de la ingeniería biomédica y la psicofisiología, incluyendo el estudio del estrés, la evaluación de respuestas emocionales, la investigación en toma de decisiones y el desarrollo de dispositivos portátiles de monitoreo fisiológico. Sin embargo, aunque la GSR es un indicador útil de activación simpática, su interpretación debe considerar factores externos como la temperatura, la humedad o el movimiento del sujeto, los cuales también pueden afectar las mediciones.
 
-Gracias a estas características, la GSR se ha convertido en una herramienta importante en ingeniería biomédica para el desarrollo de dispositivos de monitoreo fisiológico y sistemas de biofeedback.
 ## Efectos de la corriente en el cuerpo humano
 El paso de corriente eléctrica por el cuerpo humano, en ocasiones suele producir diferentes efectos fisiológicos dependiendo de la intensidad de la corriente, el tiempo de exposición, si la corriente es directa o alterna y el trayecto que va a seguir en el cuerpo humano.
 
