@@ -21,22 +21,36 @@ Para corrientes pequeñas, menores a 1 mA, generalmente no se presentan efectos 
 
 En aplicaciones biomédicas que implican contacto eléctrico con el cuerpo humano, es fundamental garantizar que la corriente que atraviesa el organismo sea extremadamente baja. Por esta razón, en sistemas de medición fisiológica como el utilizado en esta práctica, se limita la corriente a valores inferiores a 1 mA, garantizando condiciones seguras para el sujeto.
 ## Cálculos de seguridad del circuito
-El sistema propuesto para la medición de la respuesta galvánica cutánea se alimenta con un funete de voltaje baja, entre 3.3 y 5 v. Debido a que el dispositivo entra en contacto directo con el cuerpo humano, es de vital importancia garantizar que la corriente que circule a través de la piel del usuario se mantenga dentro de límites seguros.
-Para verificar que el circuito es seguro, se calcula la corriente que podría circular por el usuario. En el circuito, la corriente queda limitada por la resistencia R1 = 68 kΩ y por la resistencia de la piel 
- R_{\text{piel}.La ecuación general es:
- $$
- $I=\frac{V_{CC}-V_{EE}}{68\,k\Omega + R_{\text{piel}}}$.
- $$
-Para seguridad se analiza el caso extremo:
+El sistema propuesto para la medición de la respuesta galvánica cutánea se alimenta con una fuente de voltaje baja, entre 3.3 V y 5 V. Debido a que el dispositivo entra en contacto directo con el cuerpo humano, es de vital importancia garantizar que la corriente que circula a través de la piel del usuario se mantenga dentro de límites seguros.
 
- R_{\text{piel}: 0
- 
-Sustituyendo:
+En el circuito, la corriente queda limitada por la resistencia **R1 = 68 kΩ** y por la resistencia de la piel $R_{\text{piel}}$.
 
- $I=\frac{V_{CC}-V_{EE}}{68\,k\Omega}$.​
+La ecuación general que describe la corriente es:
 
-En ESP32 típicamente:
+$$
+I=\frac{V_{CC}-V_{EE}}{68\,k\Omega + R_{\text{piel}}}
+$$
 
-V_{CC} = 3.3 V, V_{EE} = 0 V
+Para verificar la seguridad del circuito se analiza el caso extremo:
+
+$$
+R_{\text{piel}} = 0
+$$
+
+Sustituyendo en la ecuación:
+
+$$
+I=\frac{V_{CC}-V_{EE}}{68\,k\Omega}
+$$
+
+En el caso de una ESP32 típicamente:
+
+$$
+V_{CC}=3.3V,\qquad V_{EE}=0V
+$$
 
 Entonces:
+
+$$
+I=\frac{3.3}{68000}
+$$
