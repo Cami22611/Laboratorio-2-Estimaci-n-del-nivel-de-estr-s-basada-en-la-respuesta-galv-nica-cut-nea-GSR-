@@ -28,7 +28,7 @@ En el circuito, la corriente queda limitada por la resistencia **R1 = 68 kΩ** y
 La ecuación general que describe la corriente es:
 
 $$
-I=\frac{V_{CC}-V_{EE}}{68\,k\Omega + R_{\text{piel}}}
+I=\frac{V_{CC}-V_{EE}}{68\k\Omega + R_{\text{piel}}}
 $$
 
 Para verificar la seguridad del circuito se analiza el caso extremo:
@@ -40,7 +40,7 @@ $$
 Sustituyendo en la ecuación:
 
 $$
-I=\frac{V_{CC}-V_{EE}}{68\,k\Omega}
+I=\frac{V_{CC}-V_{EE}}{68\k\Omega}
 $$
 
 En el caso de una ESP32 típicamente:
@@ -54,6 +54,7 @@ Entonces:
 $$
 I=\frac{3.3}{68000}
 $$
+
 Resultado numérico
 
 $$
@@ -69,3 +70,22 @@ $$
 $$
 I_{max}=0.0485\ mA
 $$
+
+Este valor es considerablemente menor que el límite de seguridad de **1 mA** establecido para este tipo de aplicaciones biomédicas. Por lo tanto, incluso en el caso extremo en el que la resistencia de la piel sea muy baja, el circuito diseñado garantiza que la corriente que atraviesa al usuario permanece dentro de rangos seguros.
+
+Esto demuestra que la resistencia limitadora de **68 kΩ** cumple adecuadamente su función de restringir la corriente en el sistema, permitiendo realizar la medición de la conductancia cutánea sin representar un riesgo para el usuario.
+
+## Diseño del circuito de medición GSR
+
+El circuito implementado para la medición de la respuesta galvánica cutánea se basa en un divisor resistivo, en el cual la resistencia de la piel del usuario forma parte del circuito eléctrico. La señal es capturada mediante dos electrodos colocados sobre la piel, generalmente en los dedos o la palma de la mano, regiones que presentan una alta densidad de glándulas sudoríparas y permiten obtener variaciones más sensibles de la conductancia cutánea.
+
+En el circuito, los electrodos se conectan a una fuente de alimentación positiva (V+), mientras que el nodo de medición se conecta al pin analógico A0 del Arduino. Desde este punto se conecta una resistencia R1 de 68 kΩ hacia tierra, formando así el divisor resistivo. Las variaciones en la resistencia de la piel producen cambios en el voltaje presente en el nodo de medición, los cuales son detectados por el conversor analógico-digital (ADC) del microcontrolador.
+
+Adicionalmente, el circuito incorpora un condensador C1 de 1 µF conectado en paralelo con la resistencia. Este condensador actúa como un filtro pasa-bajos que permite reducir el ruido de alta frecuencia y estabilizar la señal adquirida, mejorando la calidad de la medición.
+
+Cuando la actividad del sistema nervioso simpático aumenta, se incrementa la actividad de las glándulas sudoríparas, lo que reduce la resistencia eléctrica de la piel y aumenta su conductancia. Como consecuencia, el voltaje medido en el nodo analógico del Arduino cambia, permitiendo registrar las variaciones de la señal GSR en tiempo real para su posterior visualización y análisis.
+
+El uso de una resistencia de 68 kΩ garantiza que la corriente que circula a través del cuerpo sea extremadamente baja, manteniéndose muy por debajo del límite de seguridad de 1 mA, lo cual asegura condiciones seguras para el usuario durante la medición.
+
+<img width="420" height="248" alt="image" src="https://github.com/user-attachments/assets/d7f8e9eb-e917-49b3-a7f8-72f55f33d52d" />
+
