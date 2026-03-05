@@ -27,3 +27,16 @@ Para verificar que el circuito es seguro, se calcula la corriente que podría ci
  $$
  $I=\frac{V_{CC}-V_{EE}}{68\,k\Omega + R_{\text{piel}}}$.
  $$
+Para seguridad se analiza el caso extremo:
+
+ R_{\text{piel}: 0
+ 
+Sustituyendo:
+
+ $I=\frac{V_{CC}-V_{EE}}{68\,k\Omega}$.​
+
+En ESP32 típicamente:
+
+V_{CC} = 3.3 V, V_{EE} = 0 V
+
+Entonces:
