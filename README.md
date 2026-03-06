@@ -96,7 +96,7 @@ El dispositivo vestible desarrollado para la medición de la respuesta galvánic
 En la protoboard se encuentran los componentes electrónicos del sistema, incluyendo la resistencia de 68 kΩ y el condensador utilizados para el acondicionamiento de la señal, así como el microcontrolador ESP32 encargado de la adquisición y transmisión de los datos. Con el fin de que el sistema pudiera utilizarse como un dispositivo vestible, la protoboard junto con el ESP32 se colocó en la muñeca del usuario y se fijó utilizando cintas de velcro.
 
 La alimentación del sistema se realizó mediante una power bank, lo que permite que el dispositivo funcione de manera portátil sin necesidad de una conexión directa a un computador. Debido a que la transmisión de datos debía realizarse de forma inalámbrica, se empleó la conectividad Bluetooth del ESP32 para enviar la información capturada hacia el computador, donde posteriormente se visualiza y analiza la señal obtenida.
-<img width="500" height="400" alt="image" src="https://github.com/user-attachments/assets/439071c1-4126-4418-804d-0e52cd83eca0" />
+<img width="700" height="800" alt="image" src="https://github.com/user-attachments/assets/439071c1-4126-4418-804d-0e52cd83eca0" />
 
 
 # Implementación del sistema
