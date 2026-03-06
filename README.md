@@ -182,8 +182,7 @@ También existe una variabilidad considerable entre sujetos, debido a diferencia
 Finalmente, la GSR presenta una latencia relativamente lenta en comparación con otros indicadores fisiológicos, ya que las respuestas sudomotoras suelen aparecer entre 1 y 3 segundos después del estímulo, lo que puede limitar su precisión temporal en ciertos paradigmas experimentales.
 
 # Referencias:
-- Pop-Jordanova, N., et al. (2020).Electrodermal Activity and Stress Assessment.
-PRILOZI – Macedonian Academy of Sciences and Arts.DOI: https://doi.org/10.2478/prilozi-2020-0028
+-Phadke, A. N., Harasheh, K., & Gill, S. (2026). Wearable IoT-enabled galvanic skin response device for objective pain and stress monitoring. Sensors, 26(1), 116. https://doi.org/10.3390/s26010116
 
 - Arsalan, A., Majid, M., Anwar, S. M., & Khan, M. (2022). Human stress assessment: A comprehensive review of methods using wearable sensors. IEEE Access, 10, 39373–39389.
 
