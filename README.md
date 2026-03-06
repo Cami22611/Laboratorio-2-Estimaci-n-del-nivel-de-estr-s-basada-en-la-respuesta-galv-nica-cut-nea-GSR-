@@ -149,6 +149,50 @@ void loop() {
 }
 ```
 Para ello se utiliza la librería BluetoothSerial, que habilita la comunicación inalámbrica con otros dispositivos, y se crea el objeto SerialBT para gestionar el envío de datos. La señal analógica del circuito se recibe a través del pin 34, conectado al nodo del divisor resistivo formado por la resistencia de 68 kΩ y la resistencia de la piel. El sistema se configura para trabajar con una frecuencia de muestreo de 1000 Hz, lo que permite capturar mil muestras por segundo, controlando el tiempo entre lecturas mediante la función micros(). Durante la inicialización se establecen las comunicaciones seriales y Bluetooth con el nombre “ESP32_EMG”, y se configura el convertidor analógico–digital del ESP32 con una resolución de 12 bits, lo que permite obtener valores entre 0 y 4095 y mejorar la precisión de la medición. Posteriormente, en cada ciclo del programa se realiza la lectura de la señal mediante analogRead() y, si existe un dispositivo conectado por Bluetooth, el valor adquirido se envía al computador utilizando SerialBT.println(), permitiendo visualizar y analizar la señal en tiempo real.
+
+# Obtención de los umbrales de clasificación
+Para la detección de los diferentes niveles de activación fisiológica a partir de la señal de actividad electrodermal (EDA), se implementó un procedimiento de calibración individual con el fin de estimar los valores basales del sujeto y definir umbrales de clasificación relativos a su propia variabilidad fisiológica.
+
+### Calibración del sujeto
+
+El participante fue conectado al circuito de medición de respuesta galvánica de la piel (GSR) mediante electrodos colocados en la superficie cutánea. Posteriormente se realizó una fase de calibración de 10 segundos, durante la cual el sujeto permaneció en reposo y sin movimiento para registrar la señal basal.
+
+Durante esta etapa se adquirieron muestras de la señal con una frecuencia de muestreo de 500 Hz, obteniendo un conjunto de datos que representa el estado fisiológico de referencia del sujeto.
+
+Para reducir el ruido presente en la señal cruda, los datos adquiridos fueron suavizados utilizando un filtro de media móvil, lo que permitió obtener una estimación más estable de la señal basal.
+
+A partir de la señal calibrada se calcularon dos parámetros estadísticos fundamentales:
+
+- Media basal (baselineMean): representa el nivel promedio de conductancia cutánea del sujeto en reposo.
+
+- Desviación estándar basal (baselineStd): cuantifica la variabilidad natural de la señal durante el estado basal.
+
+### Normalización de la señal
+
+Con el fin de evaluar las variaciones de la señal respecto al estado basal, los valores adquiridos durante la fase experimental fueron normalizados mediante el cálculo del Z-score, definido como:
+
+𝑍 = (𝑥 −𝜇)/𝜎
+​
+donde:
+x corresponde al valor instantáneo de la señal,
+μ es la media basal,
+σ es la desviación estándar basal.
+
+Esta normalización permite expresar los cambios de la señal en términos de desviaciones respecto al nivel basal del sujeto, facilitando la comparación y detección de cambios fisiológicos asociados a variaciones en la actividad del sistema nervioso autónomo.
+
+### Definición de umbrales
+
+A partir de la señal normalizada se definieron umbrales empíricos de clasificación para estimar el estado fisiológico del sujeto. Estos umbrales se establecieron considerando tanto el nivel medio de activación (Z-score) como la frecuencia de respuestas fásicas de conductancia cutánea (SCR) detectadas en la señal.
+
+Los rangos definidos fueron:
+
+| Estado fisiológico | Criterio                                      |
+| ------------------ | --------------------------------------------- |
+| Relajado           | ( Z <= 0.5 ) y tasa de picos ≤ 6 picos/min  |
+| Neutro             | ( 0.5 < Z < 1.5 )                             |
+| Estrés probable    | ( Z >= 1.5 ) o tasa de picos ≥ 12 picos/min |
+
+  
 ## Procesamiento y visualización de la señal en Matlab
 
 El script desarrollado en MATLAB permite recibir en tiempo real los datos enviados por el ESP32 mediante comunicación serial por Bluetooth. Inicialmente se realiza una etapa de calibración, durante la cual el usuario permanece en reposo mientras se registran varias muestras de la señal para calcular un nivel basal de referencia.
