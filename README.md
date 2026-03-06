@@ -28,7 +28,7 @@ En el circuito, la corriente queda limitada por la resistencia **R1 = 68 kΩ** y
 La ecuación general que describe la corriente es:
 
 $$
-I=\frac{V_{CC}-V_{EE}}{68\k\Omega + R_{\text{piel}}}
+I=\frac{V_{CC}-V_{EE}}{68\,k\Omega + R_{\text{piel}}}
 $$
 
 Para verificar la seguridad del circuito se analiza el caso extremo:
@@ -40,7 +40,7 @@ $$
 Sustituyendo en la ecuación:
 
 $$
-I=\frac{V_{CC}-V_{EE}}{68\k\Omega}
+I=\frac{V_{CC}-V_{EE}}{68\,k\Omega}
 $$
 
 En el caso de una ESP32 típicamente:
@@ -88,4 +88,62 @@ Cuando la actividad del sistema nervioso simpático aumenta, se incrementa la ac
 El uso de una resistencia de 68 kΩ garantiza que la corriente que circula a través del cuerpo sea extremadamente baja, manteniéndose muy por debajo del límite de seguridad de 1 mA, lo cual asegura condiciones seguras para el usuario durante la medición.
 
 <img width="420" height="248" alt="image" src="https://github.com/user-attachments/assets/d7f8e9eb-e917-49b3-a7f8-72f55f33d52d" />
+
+# Diseño del dispositivo vestible
+
+El dispositivo vestible desarrollado para la medición de la respuesta galvánica cutánea se diseñó con el objetivo de permitir la captura de la señal de conductancia de la piel de forma sencilla y portátil. Para la adquisición de la señal se utilizaron tiras de aluminio colocadas en los dedos del usuario, las cuales funcionan como electrodos encargados de detectar las variaciones en la conductancia eléctrica de la piel. Estas tiras se conectan mediante cables al circuito implementado en una protoboard.
+
+En la protoboard se encuentran los componentes electrónicos del sistema, incluyendo la resistencia de 68 kΩ y el condensador utilizados para el acondicionamiento de la señal, así como el microcontrolador ESP32 encargado de la adquisición y transmisión de los datos. Con el fin de que el sistema pudiera utilizarse como un dispositivo vestible, la protoboard junto con el ESP32 se colocó en la muñeca del usuario y se fijó utilizando cintas de velcro.
+
+La alimentación del sistema se realizó mediante una power bank, lo que permite que el dispositivo funcione de manera portátil sin necesidad de una conexión directa a un computador. Debido a que la transmisión de datos debía realizarse de forma inalámbrica, se empleó la conectividad Bluetooth del ESP32 para enviar la información capturada hacia el computador, donde posteriormente se visualiza y analiza la señal obtenida.
+
+# Implementación del sistema
+
+## Programación del microcontrolador
+
+El código implementado en el microcontrolador ESP32 permite adquirir la señal proveniente del circuito de medición de conductancia cutánea y transmitirla de forma inalámbrica hacia un computador mediante Bluetooth.
+
+```bash
+#include "BluetoothSerial.h"
+
+BluetoothSerial SerialBT;
+
+const int adcPin = 34;
+
+const int fs = 1000;
+const unsigned long Ts = 1000000/fs;
+
+unsigned long lastSample = 0;
+
+void setup() {
+
+  Serial.begin(115200);
+
+  SerialBT.begin("ESP32_EMG");
+
+  analogReadResolution(12);
+  analogSetAttenuation(ADC_11db);
+
+  lastSample = micros();
+}
+
+void loop() {
+
+  unsigned long now = micros();
+
+  if (now - lastSample >= Ts) {
+
+    lastSample += Ts;
+
+    int adcValue = analogRead(adcPin);
+
+    if (SerialBT.hasClient()) {
+      SerialBT.println(adcValue);
+    }
+
+  }
+
+}
+```
+Para ello se utiliza la librería BluetoothSerial, que habilita la comunicación inalámbrica con otros dispositivos, y se crea el objeto SerialBT para gestionar el envío de datos. La señal analógica del circuito se recibe a través del pin 34, conectado al nodo del divisor resistivo formado por la resistencia de 68 kΩ y la resistencia de la piel. El sistema se configura para trabajar con una frecuencia de muestreo de 1000 Hz, lo que permite capturar mil muestras por segundo, controlando el tiempo entre lecturas mediante la función micros(). Durante la inicialización se establecen las comunicaciones seriales y Bluetooth con el nombre “ESP32_EMG”, y se configura el convertidor analógico–digital del ESP32 con una resolución de 12 bits, lo que permite obtener valores entre 0 y 4095 y mejorar la precisión de la medición. Posteriormente, en cada ciclo del programa se realiza la lectura de la señal mediante analogRead() y, si existe un dispositivo conectado por Bluetooth, el valor adquirido se envía al computador utilizando SerialBT.println(), permitiendo visualizar y analizar la señal en tiempo real.
 
