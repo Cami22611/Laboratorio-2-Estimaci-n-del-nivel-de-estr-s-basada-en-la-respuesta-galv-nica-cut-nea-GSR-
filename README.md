@@ -146,6 +146,298 @@ void loop() {
 }
 ```
 Para ello se utiliza la librería BluetoothSerial, que habilita la comunicación inalámbrica con otros dispositivos, y se crea el objeto SerialBT para gestionar el envío de datos. La señal analógica del circuito se recibe a través del pin 34, conectado al nodo del divisor resistivo formado por la resistencia de 68 kΩ y la resistencia de la piel. El sistema se configura para trabajar con una frecuencia de muestreo de 1000 Hz, lo que permite capturar mil muestras por segundo, controlando el tiempo entre lecturas mediante la función micros(). Durante la inicialización se establecen las comunicaciones seriales y Bluetooth con el nombre “ESP32_EMG”, y se configura el convertidor analógico–digital del ESP32 con una resolución de 12 bits, lo que permite obtener valores entre 0 y 4095 y mejorar la precisión de la medición. Posteriormente, en cada ciclo del programa se realiza la lectura de la señal mediante analogRead() y, si existe un dispositivo conectado por Bluetooth, el valor adquirido se envía al computador utilizando SerialBT.println(), permitiendo visualizar y analizar la señal en tiempo real.
+## Procesamiento y visualización de la señal en Matlab
+
+El script desarrollado en MATLAB permite recibir en tiempo real los datos enviados por el ESP32 mediante comunicación serial por Bluetooth. Inicialmente se realiza una etapa de calibración, durante la cual el usuario permanece en reposo mientras se registran varias muestras de la señal para calcular un nivel basal de referencia.
+
+Posteriormente, durante la fase de adquisición, cada muestra recibida es normalizada mediante el cálculo del Z-score, utilizando el promedio y la desviación estándar obtenidos en la calibración. Esto permite expresar los cambios de la señal con respecto al nivel basal y facilita la identificación de variaciones asociadas a la actividad del sistema nervioso simpático.
+
+El programa también analiza ventanas de tiempo de la señal para estimar el estado fisiológico del usuario. Para ello se calcula el valor promedio del Z-score y se detectan picos de respuesta de conductancia cutánea (SCR) mediante la función findpeaks. Con base en estos parámetros, el sistema clasifica el estado del usuario como relajado, neutro o estrés probable. Finalmente, los datos adquiridos se almacenan en archivos para su posterior análisis y se generan gráficas de la señal registrada.
+
+```bash
+clc
+clear
+close all
+
+portName = "COM10";
+baudRate = 115200;
+
+Fs = 500;
+Ts = 1/Fs;
+
+calibrationTime = 10;
+displayWindow   = 5;
+classWindow     = 10;
+
+stressZ  = 1.5;
+relaxZ   = 0.5;
+
+minPeakDistance = 1;
+minPeakProm     = 1;
+
+serialObj = serialport(portName,baudRate);
+configureTerminator(serialObj,"LF");
+serialObj.Timeout = 2;
+flush(serialObj);
+
+fprintf("Conectado al puerto %s\n",portName)
+
+samplesCal = round(calibrationTime*Fs);
+calData = nan(samplesCal,1);
+
+visSamples = round(displayWindow*Fs);
+plotBuffer = zeros(visSamples,1);
+timeAxis = (-visSamples+1:0)'/Fs;
+
+figure('Name','Calibración EDA')
+plotHandle = plot(timeAxis,plotBuffer,'LineWidth',1.5);
+grid on
+xlabel('Tiempo (s)')
+ylabel('Señal cruda')
+title('Permanece quieto durante la calibración')
+
+disp("Iniciando calibración...")
+
+k = 1;
+while k <= samplesCal
+
+    value = readSerialValue(serialObj);
+
+    if ~isnan(value)
+
+        calData(k) = value;
+
+        plotBuffer(1:end-1) = plotBuffer(2:end);
+        plotBuffer(end) = value;
+
+        plotHandle.YData = movmean(plotBuffer,5);
+
+        drawnow limitrate
+
+        k = k + 1;
+    end
+end
+
+calSmooth = movmean(calData,5,'omitnan');
+
+baselineMean = mean(calSmooth,'omitnan');
+baselineStd  = std(calSmooth,'omitnan');
+
+if baselineStd < 1e-6
+    baselineStd = 1e-6;
+end
+
+fprintf("Baseline calculado\n")
+
+answer = inputdlg("Tiempo de adquisición (s):","EDA",1,{"30"});
+recordTime = str2double(answer{1});
+
+totalSamples = round(recordTime*Fs);
+
+timeVector = (0:totalSamples-1)'/Fs;
+signalData = nan(totalSamples,1);
+
+classSamples = round(classWindow*Fs);
+
+analysisBuffer = nan(classSamples,1);
+
+peakDistanceSamples = round(minPeakDistance*Fs);
+
+figure('Name','EDA tiempo real')
+
+plotBuffer2 = zeros(visSamples,1);
+
+plotHandle2 = plot(timeAxis,plotBuffer2,'LineWidth',1.5);
+grid on
+xlabel('Tiempo (s)')
+ylabel('Nivel normalizado (Z)')
+title('EDA en tiempo real')
+
+hold on
+yline(stressZ,'--')
+yline(relaxZ,'--')
+yline(0)
+hold off
+
+ylim([-4 6])
+
+stateText = annotation('textbox',[0.15 0.8 0.7 0.1],...
+    'String','Estado: ...',...
+    'FitBoxToText','on',...
+    'FontWeight','bold');
+
+disp("Adquisición iniciada")
+
+n = 1;
+
+while n <= totalSamples
+
+    value = readSerialValue(serialObj);
+
+    if ~isnan(value)
+
+        signalData(n) = value;
+
+        zvalue = (value-baselineMean)/baselineStd;
+
+        plotBuffer2(1:end-1) = plotBuffer2(2:end);
+        plotBuffer2(end) = zvalue;
+
+        plotHandle2.YData = movmean(plotBuffer2,9);
+
+        analysisBuffer(1:end-1) = analysisBuffer(2:end);
+        analysisBuffer(end) = value;
+
+        validCount = sum(~isnan(analysisBuffer));
+
+        if validCount > 0.7*classSamples
+
+            temp = movmean(analysisBuffer,9,'omitnan');
+
+            zWindow = (temp-baselineMean)/baselineStd;
+
+            meanZ = mean(zWindow,'omitnan');
+
+            zValid = zWindow(~isnan(zWindow));
+
+            peakRate = 0;
+
+            if length(zValid) > peakDistanceSamples+10
+
+                [pks,~] = findpeaks(zValid,...
+                    'MinPeakDistance',peakDistanceSamples,...
+                    'MinPeakProminence',minPeakProm);
+
+                peakRate = (length(pks)/classWindow)*60;
+            end
+
+            if meanZ >= stressZ || peakRate >= 12
+
+                state = "Estrés probable";
+
+            elseif meanZ <= relaxZ && peakRate <= 6
+
+                state = "Relajado";
+
+            else
+
+                state = "Estado neutro";
+
+            end
+
+            stateText.String = sprintf("Estado: %s\nZ=%.2f | SCR=%.1f picos/min",...
+                state,meanZ,peakRate);
+
+        end
+
+        drawnow limitrate
+
+        n = n + 1;
+    end
+end
+
+timestamp = datestr(now,"yyyymmdd_HHMMSS");
+
+matFile = "EDA_" + timestamp + ".mat";
+csvFile = "EDA_" + timestamp + ".csv";
+
+fs = Fs;
+t  = timeVector;
+data = signalData;
+
+save(matFile,'fs','t','data','calData','baselineMean','baselineStd')
+
+tabla = table(t,data);
+writetable(tabla,csvFile)
+
+fprintf("Archivos guardados:\n%s\n%s\n",matFile,csvFile)
+
+tCal = (0:length(calData)-1)/Fs;
+
+figure('Name','Señal de calibración')
+plot(tCal,calData,'LineWidth',1.5)
+grid on
+xlabel('Tiempo (s)')
+ylabel('EDA')
+title('Señal durante calibración')
+
+figure('Name','Señal EDA completa')
+plot(timeVector,signalData,'LineWidth',1.5)
+grid on
+xlabel('Tiempo (s)')
+ylabel('EDA')
+title('Señal adquirida')
+
+zSignal = (signalData-baselineMean)/baselineStd;
+
+figure('Name','Señal normalizada')
+plot(timeVector,zSignal,'LineWidth',1.5)
+grid on
+xlabel('Tiempo (s)')
+ylabel('Z-score')
+title('EDA normalizada')
+
+clear serialObj
+
+disp("Proceso terminado")
+
+function val = readSerialValue(serialObj)
+
+val = nan;
+
+try
+
+    if serialObj.NumBytesAvailable > 0
+
+        line = readline(serialObj);
+
+        line = strtrim(line);
+
+        num = regexp(line,'[-+]?\d*\.?\d+','match');
+
+        if ~isempty(num)
+
+            val = str2double(num{end});
+
+            if ~isfinite(val)
+                val = nan;
+            end
+
+        end
+    end
+
+catch
+    val = nan;
+
+end
+
+end
+```
+# Resultados obtenidos
+## Gráficas de la señal EDA
+### Señal EDA normalizada durante la adquisición
+Esta gráfica muestra la evolución completa de la señal de actividad electrodérmica normalizada durante todo el tiempo de adquisición, representada en términos de Z-score. A lo largo del registro se observan múltiples fluctuaciones y picos en la señal, los cuales corresponden a respuestas transitorias de conductancia cutánea (SCR). Estas variaciones reflejan cambios en la activación fisiológica del usuario durante la medición y permiten identificar momentos de mayor o menor actividad electrodérmica en el transcurso del experimento.
+<img width="1050" height="645" alt="image" src="https://github.com/user-attachments/assets/239f1ca1-e253-48f6-8caf-880d224eca69" />
+
+### Señal EDA en estado relajado
+En esta gráfica se observa la señal de actividad electrodérmica normalizada cuando el sistema clasifica el estado del usuario como relajado. El valor del Z-score registrado es Z = 0.28, lo que indica que la señal se mantiene muy cercana al nivel basal obtenido durante la calibración. Además, el sistema reporta 0 picos SCR por minuto, lo que refleja una baja actividad del sistema nervioso simpático. La señal presenta variaciones pequeñas y relativamente estables alrededor del nivel basal, lo cual es consistente con un estado fisiológico de reposo.
+<img width="1052" height="646" alt="image" src="https://github.com/user-attachments/assets/c22da166-7372-4ef8-ac35-d2b1935beac6" />
+
+### Señal EDA en estado neutro
+En esta condición la señal presenta variaciones moderadas respecto al nivel basal. El sistema clasifica el estado como estado neutro, con un valor de Z = 0.69 y una tasa aproximada de 6 picos SCR por minuto. En la gráfica se observan fluctuaciones más evidentes que en el estado relajado, lo cual sugiere una activación fisiológica intermedia. Este comportamiento puede estar asociado con un nivel normal de atención o con pequeñas variaciones fisiológicas del usuario durante la medición.
+<img width="1027" height="636" alt="image" src="https://github.com/user-attachments/assets/b1f5fbcf-6fd9-4601-9e3c-06a568011494" />
+
+### Señal EDA en estrés probable
+En esta gráfica se observa una mayor elevación de la señal con respecto al nivel basal. El sistema identifica esta condición como estrés probable, con un valor de Z = 1.37 y aproximadamente 12 picos SCR por minuto. Las variaciones de la señal son más pronunciadas y se mantienen por encima de los umbrales de referencia establecidos en el algoritmo. Este comportamiento indica una mayor activación del sistema nervioso simpático, lo cual puede relacionarse con un aumento en la actividad de las glándulas sudoríparas y, por tanto, en la conductancia de la piel.
+<img width="1027" height="640" alt="image" src="https://github.com/user-attachments/assets/c73953a3-bfab-45d0-9c1a-8c65b9fc5a70" />
+# Análisis 
+## Análisis 1. Eficacia del sistema para monitoreo ambulatorio del estrés
+
+El sistema desarrollado para la medición de la actividad electrodérmica demostró ser una herramienta funcional para el monitoreo ambulatorio del estrés en entornos cotidianos como oficinas, aulas universitarias y el hogar. Gracias a su diseño portátil, compuesto por electrodos colocados en los dedos, una unidad electrónica basada en ESP32 y una alimentación mediante power bank, el dispositivo permite realizar mediciones sin restringir significativamente el movimiento del usuario. La transmisión inalámbrica de los datos mediante Bluetooth y su procesamiento en MATLAB facilitan la visualización en tiempo real de la señal de conductancia cutánea, así como la estimación del estado fisiológico a partir de parámetros como el Z-score y la tasa de picos SCR. Los resultados obtenidos muestran que el sistema es capaz de diferenciar estados de baja activación fisiológica, como la relajación, de condiciones con mayor actividad del sistema nervioso simpático, asociadas a estados de estrés o mayor carga cognitiva. En contextos como oficinas o aulas universitarias, donde las personas pueden experimentar cambios en el nivel de atención, presión académica o laboral, este tipo de medición permite observar variaciones fisiológicas relacionadas con la respuesta autonómica. Por lo tanto, en el entorno del hogar el sistema puede utilizarse para monitorear cambios en la activación fisiológica durante actividades cotidianas o situaciones que generen tensión emocional, teniendo en cuenta que, el dispositivo es de carácter experimental y no pretende sustituir equipos clínicos especializados, los resultados obtenidos evidencian que el sistema es capaz de detectar cambios relevantes en la conductancia cutánea, lo que demuestra su potencial como herramienta de monitoreo ambulatorio del estrés en entornos no clínicos.
+
+## Análisis 2. Alcance y limitaciones para la detección de estrés neonatal
+
+En cuanto a su posible aplicación en la detección de estrés neonatal, el sistema presenta un alcance limitado debido a las características particulares de esta población y a los requerimientos clínicos asociados con su monitoreo. La conductancia cutánea es un parámetro fisiológico que también se ha utilizado en estudios neonatales para evaluar la respuesta autonómica ante estímulos como el dolor o el estrés, lo que indica que el principio de medición utilizado por el sistema tiene fundamento fisiológico válido. Sin embargo, el dispositivo construido durante esta práctica no está diseñado específicamente para su uso en recién nacidos, ya que la piel neonatal es mucho más sensible y requiere electrodos y materiales especialmente diseñados para evitar irritaciones o daños. Además, los movimientos involuntarios del neonato, la inmadurez del sistema nervioso autónomo y la variabilidad fisiológica propia de las primeras etapas de la vida pueden introducir artefactos en la señal que dificulten su interpretación, sumando que la monitorización neonatal en entornos clínicos exige dispositivos con certificación médica, protocolos estrictos de seguridad y supervisión permanente por parte de profesionales de la salud. Por lo tanto, aunque el sistema desarrollado demuestra el principio de medición de la conductancia cutánea y su relación con la activación fisiológica, su uso para la detección de estrés en recién nacidos requeriría modificaciones importantes en el diseño del dispositivo, en los electrodos utilizados y en los protocolos de medición antes de poder considerarse una herramienta viable para aplicaciones clínicas en neonatología.
 
 # Respuesta a las preguntas planteadas en la práctica:
 
