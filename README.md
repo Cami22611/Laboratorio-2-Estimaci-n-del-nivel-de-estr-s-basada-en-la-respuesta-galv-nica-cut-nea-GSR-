@@ -499,3 +499,7 @@ En general, la práctica permitió comprender tanto el principio fisiológico de
 - Pop-Jordanova, N., et al. (2020). Electrodermal activity and stress assessment. Prilozi, 41(2), 5–15. https://doi.org/10.2478/prilozi-2020-0028
 
 - Webster, J. G. (2010). Medical instrumentation: Application and design (4th ed.). Wiley.
+
+# Integrantes del informe
+
+Isabel Sofía Maldonado Roa y María Camila Martínez Ramírez
