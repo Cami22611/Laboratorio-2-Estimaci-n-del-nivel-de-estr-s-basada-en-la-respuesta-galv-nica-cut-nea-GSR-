@@ -416,7 +416,7 @@ end
 
 end
 ```
-# Resultados obtenidos
+# Resultados 
 ## Gráficas de la señal EDA
 ### Señal EDA normalizada durante la adquisición
 Esta gráfica muestra la evolución completa de la señal de actividad electrodérmica normalizada durante todo el tiempo de adquisición, representada en términos de Z-score. A lo largo del registro se observan múltiples fluctuaciones y picos en la señal, los cuales corresponden a respuestas transitorias de conductancia cutánea (SCR). Estas variaciones reflejan cambios en la activación fisiológica del usuario durante la medición y permiten identificar momentos de mayor o menor actividad electrodérmica en el transcurso del experimento.
