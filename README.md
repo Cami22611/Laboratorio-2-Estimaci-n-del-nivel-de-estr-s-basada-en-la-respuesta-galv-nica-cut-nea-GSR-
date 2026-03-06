@@ -96,6 +96,8 @@ El dispositivo vestible desarrollado para la medición de la respuesta galvánic
 En la protoboard se encuentran los componentes electrónicos del sistema, incluyendo la resistencia de 68 kΩ y el condensador utilizados para el acondicionamiento de la señal, así como el microcontrolador ESP32 encargado de la adquisición y transmisión de los datos. Con el fin de que el sistema pudiera utilizarse como un dispositivo vestible, la protoboard junto con el ESP32 se colocó en la muñeca del usuario y se fijó utilizando cintas de velcro.
 
 La alimentación del sistema se realizó mediante una power bank, lo que permite que el dispositivo funcione de manera portátil sin necesidad de una conexión directa a un computador. Debido a que la transmisión de datos debía realizarse de forma inalámbrica, se empleó la conectividad Bluetooth del ESP32 para enviar la información capturada hacia el computador, donde posteriormente se visualiza y analiza la señal obtenida.
+<img width="1029" height="1600" alt="image" src="https://github.com/user-attachments/assets/439071c1-4126-4418-804d-0e52cd83eca0" />
+
 
 # Implementación del sistema
 
@@ -472,6 +474,15 @@ Otra desventaja relevante es su alta susceptibilidad a factores externos y fisio
 También existe una variabilidad considerable entre sujetos, debido a diferencias en la densidad de glándulas sudoríparas, características de la piel y estado fisiológico basal, lo que dificulta la comparación directa entre individuos sin un proceso adecuado de normalización o calibración.
 
 Finalmente, la GSR presenta una latencia relativamente lenta en comparación con otros indicadores fisiológicos, ya que las respuestas sudomotoras suelen aparecer entre 1 y 3 segundos después del estímulo, lo que puede limitar su precisión temporal en ciertos paradigmas experimentales.
+
+# Conclusiones
+El desarrollo del sistema para la medición de la respuesta galvánica cutánea permitió demostrar que es posible registrar y analizar variaciones en la conductancia de la piel mediante un dispositivo electrónico relativamente simple basado en un microcontrolador ESP32, un circuito de medición resistivo y un sistema de procesamiento de señales en MATLAB. A través de la adquisición de datos y su posterior normalización, se evidenció que la actividad electrodérmica refleja cambios en la activación del sistema nervioso simpático, lo que permite identificar diferentes estados fisiológicos asociados con relajación, activación moderada o posibles condiciones de estrés.
+
+Los resultados obtenidos durante las pruebas experimentales muestran que el sistema es capaz de detectar variaciones en la señal de conductancia cutánea y clasificarlas mediante indicadores como el Z-score y la tasa de picos SCR por minuto. Esto permitió diferenciar distintos niveles de activación fisiológica, lo que confirma que la respuesta galvánica cutánea es un parámetro útil para el análisis de cambios emocionales o cognitivos en el usuario. Además, la transmisión de datos por Bluetooth y la visualización en tiempo real en MATLAB facilitaron el monitoreo continuo de la señal, demostrando el potencial del sistema para aplicaciones de monitoreo ambulatorio.
+
+Por otra parte, el diseño portátil del dispositivo, que integra electrodos en los dedos, una unidad electrónica colocada en la muñeca y alimentación mediante una batería externa, permitió realizar mediciones sin limitar significativamente la movilidad del usuario. Este tipo de configuración sugiere que sistemas similares podrían utilizarse para monitorear estados fisiológicos en diferentes entornos cotidianos, como el hogar, espacios de trabajo o ambientes académicos.
+
+En general, la práctica permitió comprender tanto el principio fisiológico de la respuesta galvánica cutánea como los aspectos electrónicos y computacionales necesarios para su medición y análisis. Aunque el sistema desarrollado corresponde a un prototipo experimental, los resultados obtenidos evidencian que la conductancia cutánea puede emplearse como un indicador confiable de cambios en la activación fisiológica, lo que resalta su utilidad en aplicaciones de monitoreo del estrés y en el estudio de la interacción entre procesos fisiológicos y estados emocionales.
 
 # Referencias:
 - Phadke, A. N., Harasheh, K., & Gill, S. (2026). Wearable IoT-enabled galvanic skin response device for objective pain and stress monitoring. Sensors, 26(1), 116. https://doi.org/10.3390/s26010116
